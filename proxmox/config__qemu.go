@@ -73,6 +73,7 @@ type ConfigQemu struct {
 	TPM              *TpmState             `json:"tpm,omitempty"`
 	Tablet           *bool                 `json:"tablet,omitempty"` // never nil when returned
 	Tags             *Tags                 `json:"tags,omitempty"`
+	Template         *bool                 `json:"template,omitempty"`
 	RandomnessDevice *VirtIoRNG            `json:"randomness_device,omitempty"`
 }
 
@@ -241,6 +242,9 @@ func (config ConfigQemu) mapToAPI(currentConfig ConfigQemu, version Version) (re
 	if config.Tablet != nil {
 		params[qemuApiKeyTablet] = *config.Tablet
 	}
+	if config.Template != nil {
+		params["template"] = *config.Template
+	}
 	if config.Tags != nil {
 		if v, ok := config.Tags.mapToApiUpdate(currentConfig.Tags); ok {
 			params[qemuApiKeyTags] = v
@@ -402,6 +406,9 @@ func (config *ConfigQemu) mapToStruct(vmr *VmRef, params map[string]interface{})
 	}
 	if _, isSet := params["startup"]; isSet {
 		config.Startup = params["startup"].(string)
+	}
+	if _, isSet := params["template"]; isSet {
+		config.Template = util.Pointer(Itob(int(params["template"].(float64))))
 	}
 	if _, isSet := params["smbios1"]; isSet {
 		config.Smbios1 = params["smbios1"].(string)
